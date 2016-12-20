@@ -79,12 +79,15 @@ unsigned char adv_service_data_hdr[] =
             0xFE  // Esurl Beacon Service Data UUID MSB
         };
 
-/* Initialise Uri to http://eddystone.org for a new beacon (using compression) */
+/* Initialise Uri to http://betrack.co for a new beacon (using compression) */
 unsigned char initial_uri[] =
 {
     0x02, 'p', 'h', 'y', 's', 'i', 'c', 'a', 'l', '-', 'w', 'e', 'b', 0x08 
         };
-    
+
+//Original: 0x02, 'p', 'h', 'y', 's', 'i', 'c', 'a', 'l', '-', 'w', 'e', 'b', 0x08
+//New: 0x02, 'b', 'e', 't', 'r', 'a', 'c', 'k', '.', 'c', 'o'
+
 /* Esurl Beacon Adv TX calibration for packets Low to high */
 unsigned char adv_tx_power_levels[] =
 {    ADV_TX_POWER_FOR_NEG_18,  // 0 LOWEST
@@ -223,7 +226,7 @@ extern void EsurlBeaconInitChipReset(void)
     
     /* Initialize uri_data memory in adv: 0 - 18 bytes */
     MemSet(g_esurl_beacon_data.adv.uri_data, 0, ESURL_BEACON_DATA_MAX); 
-    /* Initialize uri_data with a URI:  http://physical-web.org */
+    /* Initialize uri_data with a URI:  http://betrack.co */
     MemCopy(g_esurl_beacon_data.adv.uri_data, initial_uri, sizeof(initial_uri)); 
     g_esurl_beacon_data.adv.service_data_length = SERVICE_DATA_PRE_URI_SIZE + sizeof(initial_uri);
     g_esurl_beacon_data.adv_length = BEACON_DATA_HDR_SIZE + sizeof(initial_uri);    

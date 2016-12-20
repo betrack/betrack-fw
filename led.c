@@ -56,8 +56,8 @@
  *  Private Definitions
  *============================================================================*/
 
-/* Setup PIO4 as LED PIO */
-#define LED_PIO                     (4)
+/* Setup PIO9 as LED PIO */
+#define LED_PIO                     (9)
 
 #define LED_PIO_MASK                (PIO_BIT_MASK(LED_PIO))
 

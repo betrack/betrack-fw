@@ -741,9 +741,6 @@ static void appExitAdvertising(void)
      */
     TimerDelete(g_app_data.app_tid);
     g_app_data.app_tid = TIMER_INVALID;
-    
-    /* stop LED indication */
-    LedEnable(FALSE);
 }
 
 /*----------------------------------------------------------------------------*
@@ -1777,6 +1774,9 @@ extern void SetState(app_state new_state)
             case app_state_beaconing:
                 /* Stop beaconing */
                 BeaconStart(FALSE);
+                
+                /* stop LED indication */
+                LedEnable(FALSE);
             break;
 
             case app_state_disconnecting:
@@ -1795,6 +1795,9 @@ extern void SetState(app_state new_state)
                  * APP_*_ADVERTISING state.
                  */
                 appExitAdvertising();
+                
+                /* stop LED indication */
+                LedEnable(FALSE);
             break;
 
             case app_state_connected:
@@ -1844,6 +1847,9 @@ extern void SetState(app_state new_state)
 
                 /* Start beaconing */
                 BeaconStart(TRUE);
+                
+                /* start LED indication */
+                LedEnable(TRUE);
             break;
 
             case app_state_idle:
