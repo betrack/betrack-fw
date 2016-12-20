@@ -86,6 +86,8 @@ extern void BeaconStart(bool start)
 {
     uint8 advData[ADVERT_SIZE];
     uint16 offset = 0;
+    //uint8* beacon_name;
+    //uint8 beacon_name_size;
     uint8* beacon_data;
     uint8 beacon_data_size;
     uint8 i;
@@ -116,6 +118,36 @@ extern void BeaconStart(bool start)
 
         GapSetAdvInterval(beacon_interval, beacon_interval);
         
+        /* get the beaconing name USING SERVICE */
+        EsurlBeaconGetName(&beacon_name, &beacon_name_size);
+
+        if(beacon_name_size > 0)
+        {
+            adv_parameter_len = beacon_name[0];
+            len_i = adv_parameter_len - 1;
+            
+            /* and store in the packet */
+            for(i = 1; (i < beacon_name_size) && (offset < ADVERT_SIZE); i++,offset++, len_i--)
+            {
+                advData[offset] = beacon_name[i];
+                
+                if(len_i == 0)
+                {
+                    /* store the advertisement parameter and get length for the next parameter */
+                    LsStoreAdvScanData(adv_parameter_len, &advData[offset - adv_parameter_len + 1], ad_src_advertise);
+    
+                    adv_parameter_len = beacon_name[i+1];
+                    len_i = adv_parameter_len;
+                    i++;
+                }
+            }
+        }
+        else
+        {
+            /* store the advertisement data */
+            LsStoreAdvScanData(offset, advData, ad_src_advertise);
+        }
+
         /* get the beaconing data USING SERVICE */
         EsurlBeaconGetData(&beacon_data, &beacon_data_size);
         

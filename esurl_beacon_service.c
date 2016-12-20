@@ -71,6 +71,20 @@ unsigned char adv_service_hdr[] =
             0xFE // Esurl Beacon Service Data UUID MSB      
         };
 
+/* Esurl Beacon Service Local Name Param and Bluetooth SIG assigned 16-bit UUID */
+unsigned char adv_service_name_hdr[] = 
+{
+    0x08, // AD Type: Shortened Local Name
+            0xAA, // Esurl Beacon Service Data UUID LSB
+            0xFE  // Esurl Beacon Service Data UUID MSB
+        };
+
+/* Initialise Name to Betrack tag*/
+unsigned char initial_name[] =
+{
+    'B', 'e', 't', 'r', 'a', 'c', 'k', ' ', 't', 'a', 'g' 
+        };
+
 /* Esurl Beacon Service Data Param and Bluetooth SIG assigned 16-bit UUID */
 unsigned char adv_service_data_hdr[] = 
 {
@@ -82,7 +96,7 @@ unsigned char adv_service_data_hdr[] =
 /* Initialise Uri to http://betrack.co for a new beacon (using compression) */
 unsigned char initial_uri[] =
 {
-    0x02, 'p', 'h', 'y', 's', 'i', 'c', 'a', 'l', '-', 'w', 'e', 'b', 0x08 
+    0x02, 'b', 'e', 't', 'r', 'a', 'c', 'k', '.', 'c', 'o' 
         };
 
 //Original: 0x02, 'p', 'h', 'y', 's', 'i', 'c', 'a', 'l', '-', 'w', 'e', 'b', 0x08
@@ -109,7 +123,7 @@ unsigned char radio_tx_power_levels[] =
  *===========================================================================*/
 
 /* Total size 28 bytes */
-typedef struct _ESURL_BEACON_ADV_T
+typedef struct _ESURL_BEACON_DATA_T
 {
     /* Current beacon data value */
     uint8 service_hdr[sizeof(adv_service_hdr)];
@@ -117,23 +131,39 @@ typedef struct _ESURL_BEACON_ADV_T
     uint8 service_data_length;
     
     uint8 service_data_hdr[sizeof(adv_service_data_hdr)];
-    
-    uint8 flags;
-    
-    uint8 tx_power;
-    
+            
     uint8 uri_data[ESURL_BEACON_DATA_MAX];
     
-} ESURL_BEACON_ADV_T;
+} ESURL_BEACON_DATA_T;
+
+/* Total size 28 bytes */
+typedef struct _ESURL_BEACON_NAME_T
+{
+    /* Current beacon name value */
+    uint8 service_hdr[sizeof(adv_service_hdr)];
+    
+    uint8 service_name_length;
+    
+    uint8 service_name_hdr[sizeof(adv_service_name_hdr)];
+            
+    uint8 name_data[ESURL_BEACON_DATA_MAX];
+    
+} ESURL_BEACON_NAME_T;
 
 /* Beacon data type */
-typedef struct _ESURL_BEACON_DATA_T
+typedef struct _ESURL_BEACON_ADV_T
 {
     /* Current adv beacon size (does not include AD Flags)*/
     uint8 adv_length;
     
+    /* Adv name */
+    ESURL_BEACON_NAME_T name;
+
     /* Adv data */
-    ESURL_BEACON_ADV_T adv;
+    ESURL_BEACON_DATA_T data;
+
+    uint8 flags;
+    uint8 tx_power;
     
     /* A boolean TRUE/FALSE value determining if the beacon is locked */
     uint8 lock_state;
@@ -153,14 +183,14 @@ typedef struct _ESURL_BEACON_DATA_T
     /* Beacon period in milliseconds 0-65536ms */
     uint16 period;
     
-} ESURL_BEACON_DATA_T;
+} ESURL_BEACON_ADV_T;
 
 /*============================================================================*
  *  Private Data
  *===========================================================================*/
 
 /* Esurl Beacon Service data instance */
-static ESURL_BEACON_DATA_T g_esurl_beacon_data;
+static ESURL_BEACON_ADV_T g_esurl_beacon_adv;
 
 /* Esurl Beacon nvm write flag indicates if the esurl_beacon_data is dirty */
 static uint8 g_esurl_beacon_nvm_write_flag = FALSE;
@@ -213,44 +243,58 @@ extern void EsurlBeaconInitChipReset(void)
 {
     /* Initialize memory at reset before first NVM write */
     /* set the adv size to be the minimum (Just the header) */
-    g_esurl_beacon_data.adv_length = BEACON_DATA_HDR_SIZE;    
+    g_esurl_beacon_adv.adv_length = BEACON_DATA_HDR_SIZE;    
+    g_esurl_beacon_adv.flags = FLAGS_DEFAULT;  
+    g_esurl_beacon_adv.tx_power = ADV_TX_POWER_DEFAULT;
+
+    /* Init the ADV name */
     
+    /* Init Beacon name hdr: 10 bytes*/
+    /*MemCopy(g_esurl_beacon_adv.name.service_hdr, adv_service_hdr, sizeof(adv_service_hdr));
+    g_esurl_beacon_adv.name.service_name_length = SERVICE_NAME_PRE_URI_SIZE;
+    MemCopy(g_esurl_beacon_adv.name.service_name_hdr, adv_service_name_hdr, sizeof(adv_service_name_hdr)); */   
+    
+    /* Initialize name_data memory in adv: 0 - 18 bytes */
+    //MemSet(g_esurl_beacon_adv.name.name_data, 0, ESURL_BEACON_DATA_MAX); 
+    /* Initialize name_data with name:  Betrack tag */
+    /*MemCopy(g_esurl_beacon_adv.name.name_data, initial_name, sizeof(initial_name)); 
+    g_esurl_beacon_adv.name.service_name_length = SERVICE_NAME_PRE_URI_SIZE + sizeof(initial_name);
+    g_esurl_beacon_adv.adv_length = BEACON_DATA_HDR_SIZE + sizeof(initial_name);*/
+
     /* Init the ADV data */
     
     /* Init Beacon data hdr: 10 bytes*/
-    MemCopy(g_esurl_beacon_data.adv.service_hdr, adv_service_hdr, sizeof(adv_service_hdr));
-    g_esurl_beacon_data.adv.service_data_length = SERVICE_DATA_PRE_URI_SIZE;
-    MemCopy(g_esurl_beacon_data.adv.service_data_hdr, adv_service_data_hdr, sizeof(adv_service_data_hdr));    
-    g_esurl_beacon_data.adv.flags = FLAGS_DEFAULT;  
-    g_esurl_beacon_data.adv.tx_power = ADV_TX_POWER_DEFAULT;
+    MemCopy(g_esurl_beacon_adv.data.service_hdr, adv_service_hdr, sizeof(adv_service_hdr));
+    g_esurl_beacon_adv.data.service_data_length = SERVICE_DATA_PRE_URI_SIZE;
+    MemCopy(g_esurl_beacon_adv.data.service_data_hdr, adv_service_data_hdr, sizeof(adv_service_data_hdr));    
     
     /* Initialize uri_data memory in adv: 0 - 18 bytes */
-    MemSet(g_esurl_beacon_data.adv.uri_data, 0, ESURL_BEACON_DATA_MAX); 
+    MemSet(g_esurl_beacon_adv.data.uri_data, 0, ESURL_BEACON_DATA_MAX); 
     /* Initialize uri_data with a URI:  http://betrack.co */
-    MemCopy(g_esurl_beacon_data.adv.uri_data, initial_uri, sizeof(initial_uri)); 
-    g_esurl_beacon_data.adv.service_data_length = SERVICE_DATA_PRE_URI_SIZE + sizeof(initial_uri);
-    g_esurl_beacon_data.adv_length = BEACON_DATA_HDR_SIZE + sizeof(initial_uri);    
+    MemCopy(g_esurl_beacon_adv.data.uri_data, initial_uri, sizeof(initial_uri)); 
+    g_esurl_beacon_adv.data.service_data_length = SERVICE_DATA_PRE_URI_SIZE + sizeof(initial_uri);
+    g_esurl_beacon_adv.adv_length = BEACON_DATA_HDR_SIZE + sizeof(initial_uri);    
     
     /* Managagement Data: Not included in transmitted ADV packet */
     
     /* Inialized lock to be unlocked */
-    g_esurl_beacon_data.lock_state = FALSE;       
+    g_esurl_beacon_adv.lock_state = FALSE;       
     
     /* Init memory in esurl beacon lock_code */
-    MemSet(g_esurl_beacon_data.lock_code, 0, ESURL_BEACON_LOCK_CODE_SIZE);  
+    MemSet(g_esurl_beacon_adv.lock_code, 0, ESURL_BEACON_LOCK_CODE_SIZE);  
     
     /* tx mode values 0-3: this is looked up in the calibration tabs below */    
-    g_esurl_beacon_data.tx_power_mode = TX_POWER_MODE_DEFAULT;  
+    g_esurl_beacon_adv.tx_power_mode = TX_POWER_MODE_DEFAULT;  
     
-    MemCopy(g_esurl_beacon_data.adv_tx_power_levels, adv_tx_power_levels, ESURL_BEACON_ADV_TX_POWER_LEVELS_SIZE);
+    MemCopy(g_esurl_beacon_adv.adv_tx_power_levels, adv_tx_power_levels, ESURL_BEACON_ADV_TX_POWER_LEVELS_SIZE);
     
-    MemCopy(g_esurl_beacon_data.radio_tx_power_levels, radio_tx_power_levels, ESURL_BEACON_RADIO_TX_POWER_LEVELS_SIZE); 
+    MemCopy(g_esurl_beacon_adv.radio_tx_power_levels, radio_tx_power_levels, ESURL_BEACON_RADIO_TX_POWER_LEVELS_SIZE); 
     
     /* Update ADV pkt and RADIO based on the TX power mode default */
     EsurlBeaconUpdateTxPowerFromMode(TX_POWER_MODE_DEFAULT);    
     
     /* Set default period = 1000 milliseconds */
-    g_esurl_beacon_data.period = 1000;
+    g_esurl_beacon_adv.period = 1000;
     
     /* Flag data structure needs writing to NVM */
     g_esurl_beacon_nvm_write_flag = TRUE;    
@@ -276,28 +320,45 @@ extern void EsurlBeaconHandleAccessRead(GATT_ACCESS_IND_T *p_ind)
     uint16 length = 0;                  /* Length of attribute data, octets */
     uint8 *p_val = NULL;                /* Pointer to attribute value */
     sys_status rc = sys_status_success; /* Function status */
+    uint8 name_data_size = 0;            /* Size of name data */
     uint8 uri_data_size = 0;            /* Size of uri data */
     
     switch(p_ind->handle)
     {  
     case HANDLE_ESURL_BEACON_LOCK_STATE:
-        length = sizeof(g_esurl_beacon_data.lock_state); 
-        p_val = &g_esurl_beacon_data.lock_state; 
+        length = sizeof(g_esurl_beacon_adv.lock_state); 
+        p_val = &g_esurl_beacon_adv.lock_state; 
         break;
         
     case HANDLE_ESURL_BEACON_FLAGS:
         length = ESURL_BEACON_FLAGS_SIZE;
-        p_val = &g_esurl_beacon_data.adv.flags;
+        p_val = &g_esurl_beacon_adv.flags;
         break; 
         
     case HANDLE_ESURL_BEACON_TX_POWER_MODE:
-        length = sizeof(g_esurl_beacon_data.tx_power_mode); 
-        p_val = &g_esurl_beacon_data.tx_power_mode;
+        length = sizeof(g_esurl_beacon_adv.tx_power_mode); 
+        p_val = &g_esurl_beacon_adv.tx_power_mode;
         break;        
         
+    case HANDLE_ESURL_BEACON_NAME_DATA:
+        
+        name_data_size = g_esurl_beacon_adv.adv_length - BEACON_DATA_HDR_SIZE; 
+        /* Return the beacon data & protect against overflow */
+        if (name_data_size > (ESURL_BEACON_DATA_MAX))
+        {
+            length = ESURL_BEACON_DATA_MAX;
+        } 
+        else
+        {              
+            length = name_data_size;  
+        }
+        p_val = g_esurl_beacon_adv.name.name_data;
+        
+        break;
+
     case HANDLE_ESURL_BEACON_URI_DATA:
         
-        uri_data_size = g_esurl_beacon_data.adv_length - BEACON_DATA_HDR_SIZE; 
+        uri_data_size = g_esurl_beacon_adv.adv_length - BEACON_DATA_HDR_SIZE; 
         /* Return the beacon data & protect against overflow */
         if (uri_data_size > (ESURL_BEACON_DATA_MAX))
         {
@@ -307,24 +368,24 @@ extern void EsurlBeaconHandleAccessRead(GATT_ACCESS_IND_T *p_ind)
         {              
             length = uri_data_size;  
         }
-        p_val = g_esurl_beacon_data.adv.uri_data;
+        p_val = g_esurl_beacon_adv.data.uri_data;
         
         break;    
         
     case HANDLE_ESURL_BEACON_ADV_TX_POWER_LEVELS:
-        length = sizeof(g_esurl_beacon_data.adv_tx_power_levels);
-        p_val = g_esurl_beacon_data.adv_tx_power_levels;
+        length = sizeof(g_esurl_beacon_adv.adv_tx_power_levels);
+        p_val = g_esurl_beacon_adv.adv_tx_power_levels;
         break; 
         
     case HANDLE_ESURL_BEACON_RADIO_TX_POWER_LEVELS:
-        length = sizeof(g_esurl_beacon_data.radio_tx_power_levels);
-        p_val = g_esurl_beacon_data.radio_tx_power_levels;
+        length = sizeof(g_esurl_beacon_adv.radio_tx_power_levels);
+        p_val = g_esurl_beacon_adv.radio_tx_power_levels;
         break;     
         
     case HANDLE_ESURL_BEACON_PERIOD:          
         length = ESURL_BEACON_PERIOD_SIZE;
-        g_esurl_beacon_buf[0] = g_esurl_beacon_data.period & 0xFF;        
-        g_esurl_beacon_buf[1] = (g_esurl_beacon_data.period >> 8) & 0xFF;            
+        g_esurl_beacon_buf[0] = g_esurl_beacon_adv.period & 0xFF;        
+        g_esurl_beacon_buf[1] = (g_esurl_beacon_adv.period >> 8) & 0xFF;            
         p_val = g_esurl_beacon_buf;            
         break;         
         
@@ -365,19 +426,19 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
     {    
     case HANDLE_ESURL_BEACON_LOCK:
         /* Sanity check for the data size */
-        if ((p_size != sizeof(g_esurl_beacon_data.lock_code)) &&
-           (g_esurl_beacon_data.lock_state == FALSE))           
+        if ((p_size != sizeof(g_esurl_beacon_adv.lock_code)) &&
+           (g_esurl_beacon_adv.lock_state == FALSE))           
         {                
             rc = gatt_status_invalid_length;
         }
-        else if ( g_esurl_beacon_data.lock_state == FALSE) 
+        else if ( g_esurl_beacon_adv.lock_state == FALSE) 
         {
-            MemCopy(g_esurl_beacon_data.lock_code, 
+            MemCopy(g_esurl_beacon_adv.lock_code, 
                     p_value,
-                    sizeof(g_esurl_beacon_data.lock_code));
+                    sizeof(g_esurl_beacon_adv.lock_code));
             
             /* Flag the lock is set */
-            g_esurl_beacon_data.lock_state = TRUE;
+            g_esurl_beacon_adv.lock_state = TRUE;
             /* Flag state needs writing to NVM */
             g_esurl_beacon_nvm_write_flag = TRUE;
         } 
@@ -389,19 +450,19 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
         
     case HANDLE_ESURL_BEACON_UNLOCK:
         /* Sanity check for the data size */
-        if (p_size != sizeof(g_esurl_beacon_data.lock_code))
+        if (p_size != sizeof(g_esurl_beacon_adv.lock_code))
         {                
             rc = gatt_status_invalid_length;
         }
         /* if locked then process the unlock request */
-        else if ( g_esurl_beacon_data.lock_state) 
+        else if ( g_esurl_beacon_adv.lock_state) 
         {
             if (MemCmp(p_value, 
-                       g_esurl_beacon_data.lock_code,
-                       sizeof(g_esurl_beacon_data.lock_code)) == 0)
+                       g_esurl_beacon_adv.lock_code,
+                       sizeof(g_esurl_beacon_adv.lock_code)) == 0)
             {
                 /* SUCCESS: so unlock beacoon */
-                g_esurl_beacon_data.lock_state = FALSE; 
+                g_esurl_beacon_adv.lock_state = FALSE; 
                 
                 /* Flag state needs writing to NVM */
                 g_esurl_beacon_nvm_write_flag = TRUE;                       
@@ -413,8 +474,35 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
         }
         break;
         
+    case HANDLE_ESURL_BEACON_NAME_DATA:
+        if (g_esurl_beacon_adv.lock_state) {
+            rc = gatt_status_insufficient_authorization;
+        } 
+        /* Sanity check for URI will fit in the Beacon */            
+        else if (p_size > (ESURL_BEACON_DATA_MAX))
+        {               
+            rc = gatt_status_invalid_length;
+        }
+        /* Process the characteristic Write */
+        else
+        {                    
+            int name_data_size = p_size;
+            
+            /* Updated the URL in the beacon structure */
+            MemCopy(g_esurl_beacon_adv.name.name_data, p_value, name_data_size);
+            g_esurl_beacon_adv.adv_length = name_data_size + BEACON_DATA_HDR_SIZE;
+            
+            /* Write the new data service size into the ADV header */
+            g_esurl_beacon_adv.name.service_name_length =
+                    name_data_size + SERVICE_DATA_PRE_URI_SIZE;
+            
+            /* Flag state needs writing to NVM */
+            g_esurl_beacon_nvm_write_flag = TRUE;                  
+        }
+        break;
+
     case HANDLE_ESURL_BEACON_URI_DATA:
-        if (g_esurl_beacon_data.lock_state) {
+        if (g_esurl_beacon_adv.lock_state) {
             rc = gatt_status_insufficient_authorization;
         } 
         /* Sanity check for URI will fit in the Beacon */            
@@ -428,11 +516,11 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
             int uri_data_size = p_size;
             
             /* Updated the URL in the beacon structure */
-            MemCopy(g_esurl_beacon_data.adv.uri_data, p_value, uri_data_size);
-            g_esurl_beacon_data.adv_length = uri_data_size + BEACON_DATA_HDR_SIZE;
+            MemCopy(g_esurl_beacon_adv.data.uri_data, p_value, uri_data_size);
+            g_esurl_beacon_adv.adv_length = uri_data_size + BEACON_DATA_HDR_SIZE;
             
             /* Write the new data service size into the ADV header */
-            g_esurl_beacon_data.adv.service_data_length =
+            g_esurl_beacon_adv.data.service_data_length =
                     uri_data_size + SERVICE_DATA_PRE_URI_SIZE;
             
             /* Flag state needs writing to NVM */
@@ -441,12 +529,12 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
         break;     
         
     case HANDLE_ESURL_BEACON_FLAGS:
-        if (g_esurl_beacon_data.lock_state)
+        if (g_esurl_beacon_adv.lock_state)
         {
             rc = gatt_status_insufficient_authorization;
         }
         /* Sanity check for the data size */
-        else if (p_size != sizeof(g_esurl_beacon_data.adv.flags))
+        else if (p_size != sizeof(g_esurl_beacon_adv.flags))
         {                
             /* invalid length */
             rc = gatt_status_invalid_length;
@@ -454,7 +542,7 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
         /* Write the flags */
         else
         {
-            g_esurl_beacon_data.adv.flags = p_value[0];
+            g_esurl_beacon_adv.flags = p_value[0];
             
             /* Flag state needs writing to NVM */
             g_esurl_beacon_nvm_write_flag = TRUE;                   
@@ -463,12 +551,12 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
         
         
     case HANDLE_ESURL_BEACON_TX_POWER_MODE:
-        if (g_esurl_beacon_data.lock_state)
+        if (g_esurl_beacon_adv.lock_state)
         {
             rc = gatt_status_insufficient_authorization;
         }
         /* Sanity check for the data size */
-        else if(p_size != sizeof(g_esurl_beacon_data.tx_power_mode))
+        else if(p_size != sizeof(g_esurl_beacon_adv.tx_power_mode))
         {                
             rc = gatt_status_invalid_length;
         }
@@ -479,7 +567,7 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
             if (( tx_power_mode >= TX_POWER_MODE_LOWEST) && 
                 (tx_power_mode <= TX_POWER_MODE_HIGH))
             {
-                g_esurl_beacon_data.tx_power_mode =  tx_power_mode; 
+                g_esurl_beacon_adv.tx_power_mode =  tx_power_mode; 
                 
                 /* NOTE: The effects of updating tx_power_mode here are turned
                  * into ADV and RADIO power updates on esurl beacon service disconnect 
@@ -497,7 +585,7 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
         break;
         
     case HANDLE_ESURL_BEACON_ADV_TX_POWER_LEVELS:
-        if (g_esurl_beacon_data.lock_state)
+        if (g_esurl_beacon_adv.lock_state)
         {
             rc = gatt_status_insufficient_authorization;
         }
@@ -511,7 +599,7 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
         else 
         {
             /* Updated the tx power calibration table for the pkt */
-            MemCopy(g_esurl_beacon_data.adv_tx_power_levels, p_value, ESURL_BEACON_ADV_TX_POWER_LEVELS_SIZE);
+            MemCopy(g_esurl_beacon_adv.adv_tx_power_levels, p_value, ESURL_BEACON_ADV_TX_POWER_LEVELS_SIZE);
             
             /* Flag state needs writing to NVM */
             g_esurl_beacon_nvm_write_flag = TRUE;               
@@ -519,7 +607,7 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
         break;
         
     case HANDLE_ESURL_BEACON_RADIO_TX_POWER_LEVELS:
-        if (g_esurl_beacon_data.lock_state)
+        if (g_esurl_beacon_adv.lock_state)
         {
             rc = gatt_status_insufficient_authorization;
         }
@@ -532,7 +620,7 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
         else 
         {
             /* Updated the tx power calibration table for the pkt */
-            MemCopy(g_esurl_beacon_data.adv_tx_power_levels, p_value, ESURL_BEACON_ADV_TX_POWER_LEVELS_SIZE);
+            MemCopy(g_esurl_beacon_adv.adv_tx_power_levels, p_value, ESURL_BEACON_ADV_TX_POWER_LEVELS_SIZE);
             
             /* Flag state needs writing to NVM */
             g_esurl_beacon_nvm_write_flag = TRUE;                 
@@ -540,7 +628,7 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
         break;        
         
     case HANDLE_ESURL_BEACON_PERIOD:
-        if (g_esurl_beacon_data.lock_state)
+        if (g_esurl_beacon_adv.lock_state)
         {
             rc = gatt_status_insufficient_authorization;
         }
@@ -551,11 +639,11 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
         else
         {
             /* Write the period (little endian 16-bits in p_value) */;   
-            g_esurl_beacon_data.period = p_value[0] + (p_value[1] << 8);  
+            g_esurl_beacon_adv.period = p_value[0] + (p_value[1] << 8);  
             
-            if ((g_esurl_beacon_data.period < BEACON_PERIOD_MIN) && (g_esurl_beacon_data.period != 0))
+            if ((g_esurl_beacon_adv.period < BEACON_PERIOD_MIN) && (g_esurl_beacon_adv.period != 0))
             { /* minimum beacon period is 100ms; zero turns off beaconing */
-                g_esurl_beacon_data.period = BEACON_PERIOD_MIN;
+                g_esurl_beacon_adv.period = BEACON_PERIOD_MIN;
             }
             /* Flag state needs writing to NVM */
             g_esurl_beacon_nvm_write_flag = TRUE;           
@@ -563,7 +651,7 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
         break;      
         
     case HANDLE_ESURL_BEACON_RESET:
-        if (g_esurl_beacon_data.lock_state)
+        if (g_esurl_beacon_adv.lock_state)
         {
             rc = gatt_status_insufficient_authorization;
             break;
@@ -577,7 +665,7 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
             /* Reset local data and NVM memory */
             EsurlBeaconInitChipReset();
             
-            /* Update NVM from g_esurl_beacon_data */       
+            /* Update NVM from g_esurl_beacon_adv */       
             EsurlBeaconWriteDataToNVM(NULL); 
         }
         break;
@@ -589,6 +677,24 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
     /* Send ACCESS RESPONSE */
     GattAccessRsp(p_ind->cid, p_ind->handle, rc, 0, NULL);
 }
+
+/*----------------------------------------------------------------------------*
+ *  NAME
+ *      EsurlBeaconGetName
+ *
+ *  DESCRIPTION
+ *      This function returns the current value of the beacon name
+ *
+ *  RETURNS
+ *      Nothing
+ *----------------------------------------------------------------------------*/
+extern void EsurlBeaconGetName(uint8** name, uint8* name_size)
+{
+    /* return current values */
+    *name = (uint8*) &g_esurl_beacon_adv.name;
+    *name_size = g_esurl_beacon_adv.adv_length;
+}
+
 /*----------------------------------------------------------------------------*
  *  NAME
  *      EsurlBeaconGetData
@@ -602,8 +708,8 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
 extern void EsurlBeaconGetData(uint8** data, uint8* data_size)
 {
     /* return current values */
-    *data = (uint8*) &g_esurl_beacon_data.adv;
-    *data_size = g_esurl_beacon_data.adv_length;
+    *data = (uint8*) &g_esurl_beacon_adv.data;
+    *data_size = g_esurl_beacon_adv.adv_length;
 }
 
 /*----------------------------------------------------------------------------*
@@ -619,7 +725,7 @@ extern void EsurlBeaconGetData(uint8** data, uint8* data_size)
 extern uint32 EsurlBeaconGetPeriodMillis(void)
 {
     /* return current value */
-    return (uint32) g_esurl_beacon_data.period * (SECOND / 1000); 
+    return (uint32) g_esurl_beacon_adv.period * (SECOND / 1000); 
 }
 
 /*----------------------------------------------------------------------------*
@@ -642,10 +748,10 @@ extern void EsurlBeaconReadDataFromNVM(uint16 *p_offset)
     g_esurl_beacon_nvm_offset = *p_offset;
     
     /* Read beacon data size */
-    Nvm_Read((uint16*)&g_esurl_beacon_data, sizeof(g_esurl_beacon_data),
+    Nvm_Read((uint16*)&g_esurl_beacon_adv, sizeof(g_esurl_beacon_adv),
              g_esurl_beacon_nvm_offset);
     
-    *p_offset += sizeof(g_esurl_beacon_data);
+    *p_offset += sizeof(g_esurl_beacon_adv);
 }
 
 /*----------------------------------------------------------------------------*
@@ -677,12 +783,12 @@ extern void EsurlBeaconWriteDataToNVM(uint16 *p_offset)
     if (g_esurl_beacon_nvm_write_flag) 
     {
         /* Write all esurl beacon service data into NVM */
-        Nvm_Write((uint16*)&g_esurl_beacon_data, sizeof(g_esurl_beacon_data),
+        Nvm_Write((uint16*)&g_esurl_beacon_adv, sizeof(g_esurl_beacon_adv),
                   g_esurl_beacon_nvm_offset); 
         g_esurl_beacon_nvm_write_flag = FALSE;
     }
     
-    *p_offset += sizeof(g_esurl_beacon_data);   
+    *p_offset += sizeof(g_esurl_beacon_adv);   
 }
 
 /*----------------------------------------------------------------------------*
@@ -741,11 +847,11 @@ extern void EsurlBeaconBondingNotify(void)
 extern void EsurlBeaconUpdateTxPowerFromMode(uint8 tx_power_mode)
 {
     /* Update the pkt tx level here */
-    g_esurl_beacon_data.adv.tx_power =
-            g_esurl_beacon_data.adv_tx_power_levels[tx_power_mode];
+    g_esurl_beacon_adv.tx_power =
+            g_esurl_beacon_adv.adv_tx_power_levels[tx_power_mode];
     /* Update the radio tx level here */
     LsSetTransmitPowerLevel(
-            g_esurl_beacon_data.radio_tx_power_levels[tx_power_mode]);
+            g_esurl_beacon_adv.radio_tx_power_levels[tx_power_mode]);
 }
 
 /*----------------------------------------------------------------------------*
@@ -763,5 +869,5 @@ extern void EsurlBeaconUpdateTxPowerFromMode(uint8 tx_power_mode)
   *----------------------------------------------------------------------------*/
 extern uint8 EsurlBeaconGetTxPowerMode(void) 
 {
-    return g_esurl_beacon_data.tx_power_mode;
+    return g_esurl_beacon_adv.tx_power_mode;
 }

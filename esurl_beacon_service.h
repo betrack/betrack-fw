@@ -72,7 +72,8 @@
 /* length of service data hdr before URI */
 #define BEACON_DATA_HDR_SIZE (10)
 #define ESURL_BEACON_DATA_MAX (18)
-#define SERVICE_DATA_PRE_URI_SIZE (5) 
+#define SERVICE_DATA_PRE_URI_SIZE (5)
+#define SERVICE_NAME_PRE_URI_SIZE (5)
 #define ESURL_BEACON_FLAGS_SIZE (1) 
 
 /* Size of array definitions for uribeacon data structure */
@@ -139,6 +140,9 @@ extern void EsurlBeaconHandleAccessRead(GATT_ACCESS_IND_T *p_ind);
  * application
  */
 extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind);
+
+/* Returns the current value of the beacon data */
+extern void EsurlBeaconGetName(uint8** name, uint8* name_size);
 
 /* Returns the current value of the beacon data */
 extern void EsurlBeaconGetData(uint8** data, uint8* data_size);
