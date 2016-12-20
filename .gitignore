@@ -2,3 +2,4 @@
 *.lst
 depend_Release_CSR101x_A05/*
 *.mak
+*.elf
