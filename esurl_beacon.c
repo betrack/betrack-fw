@@ -71,6 +71,7 @@
 #include "debug_interface.h"/* Application debug routines */
 #include "gap_service.h"    /* GAP service interface */
 #include "battery_service.h"/* Battery service interface */
+#include "temperature_service.h"/* Battery service interface */
 #include "esurl_beacon_service.h" /* Beacon service interface */
 #include "beaconing.h"      /* Beacon routines */
 

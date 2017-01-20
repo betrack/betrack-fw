@@ -61,6 +61,7 @@
 #include "appearance.h"       /* Macros for commonly used appearance values */
 #include "gap_service.h"      /* GAP Service interface */
 #include "battery_service.h"  /* Battery Service interface */
+#include "temperature_service.h"  /* Battery Service interface */
 #include "esurl_beacon_service.h"/* Beacon2 Service interface */
 #include "esurl_beacon_uuids.h"  /* Battery Service UUIDs */
 #include "battery_uuids.h"    /* Battery Service UUIDs */

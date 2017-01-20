@@ -2,6 +2,7 @@
  <folder name="C Files" >
   <extension name="c" />
   <file path="battery_service.c" />
+  <file path="temperature_service.c" />
   <file path="esurl_beacon.c" />
   <file path="beaconing.c" />
   <file path="buzzer.c" />
@@ -24,6 +25,7 @@
   <file path="user_config.h" />
   <file path="appearance.h" />
   <file path="battery_service.h" />
+  <file path="temperature_service.h" />
   <file path="battery_uuids.h" />
   <file path="esurl_beacon.h" />
   <file path="beaconing.h" />
