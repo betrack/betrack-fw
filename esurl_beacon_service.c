@@ -151,14 +151,13 @@ typedef struct _ESURL_BEACON_NAME_T
 /* Beacon data type */
 typedef struct _ESURL_BEACON_ADV_T
 {
-    /* Current adv beacon size (does not include AD Flags)*/
-    uint8 adv_length;
-    
     /* Adv name */
     ESURL_BEACON_NAME_T name;
+    uint8 name_length;
 
     /* Adv data */
     ESURL_BEACON_DATA_T data;
+    uint8 data_length;
 
     uint8 flags;
     uint8 tx_power;
@@ -239,9 +238,7 @@ extern void EsurlBeaconDataInit(void)
  *----------------------------------------------------------------------------*/
 extern void EsurlBeaconInitChipReset(void)
 {
-    /* Initialize memory at reset before first NVM write */
-    /* set the adv size to be the minimum (Just the header) */
-    g_esurl_beacon_adv.adv_length = BEACON_DATA_HDR_SIZE;    
+    /* Initialize memory at reset before first NVM write */    
     g_esurl_beacon_adv.flags = FLAGS_DEFAULT;  
     g_esurl_beacon_adv.tx_power = ADV_TX_POWER_DEFAULT;
 
@@ -249,7 +246,6 @@ extern void EsurlBeaconInitChipReset(void)
     
     /* Init Beacon name hdr: 10 bytes*/
     MemCopy(g_esurl_beacon_adv.name.service_hdr, adv_service_hdr, sizeof(adv_service_hdr));
-    g_esurl_beacon_adv.name.service_name_length = SERVICE_NAME_PRE_URI_SIZE;
     MemCopy(g_esurl_beacon_adv.name.service_name_hdr, adv_service_name_hdr, sizeof(adv_service_name_hdr));  
     
     /* Initialize name_data memory in adv: 0 - 18 bytes */
@@ -257,7 +253,7 @@ extern void EsurlBeaconInitChipReset(void)
     /* Initialize name_data with name:  Betrack tag */
     MemCopy(g_esurl_beacon_adv.name.name_data, initial_name, sizeof(initial_name)); 
     g_esurl_beacon_adv.name.service_name_length = SERVICE_NAME_PRE_URI_SIZE + sizeof(initial_name);
-    g_esurl_beacon_adv.adv_length = BEACON_DATA_HDR_SIZE + sizeof(initial_name);
+    g_esurl_beacon_adv.name_length = BEACON_NAME_HDR_SIZE + sizeof(initial_name);
 
     /* Init the ADV data */
     
@@ -271,8 +267,8 @@ extern void EsurlBeaconInitChipReset(void)
     /* Initialize uri_data with a URI:  http://betrack.co */
     MemCopy(g_esurl_beacon_adv.data.uri_data, initial_uri, sizeof(initial_uri)); 
     g_esurl_beacon_adv.data.service_data_length = SERVICE_DATA_PRE_URI_SIZE + sizeof(initial_uri);
-    g_esurl_beacon_adv.adv_length = BEACON_DATA_HDR_SIZE + sizeof(initial_uri);   
-    
+    g_esurl_beacon_adv._length = BEACON_DATA_HDR_SIZE + sizeof(initial_uri);   
+
     /* Managagement Data: Not included in transmitted ADV packet */
     
     /* Inialized lock to be unlocked */
@@ -340,7 +336,7 @@ extern void EsurlBeaconHandleAccessRead(GATT_ACCESS_IND_T *p_ind)
         
     case HANDLE_DEVICE_NAME:
         
-        name_data_size = g_esurl_beacon_adv.adv_length - BEACON_DATA_HDR_SIZE; 
+        name_data_size = g_esurl_beacon_adv.name_length - BEACON_NAME_HDR_SIZE; 
         /* Return the beacon data & protect against overflow */
         if (name_data_size > (ESURL_BEACON_DATA_MAX))
         {
@@ -356,7 +352,7 @@ extern void EsurlBeaconHandleAccessRead(GATT_ACCESS_IND_T *p_ind)
 
     case HANDLE_ESURL_BEACON_URI_DATA:
         
-        uri_data_size = g_esurl_beacon_adv.adv_length - BEACON_DATA_HDR_SIZE; 
+        uri_data_size = g_esurl_beacon_adv.data_length - BEACON_DATA_HDR_SIZE; 
         /* Return the beacon data & protect against overflow */
         if (uri_data_size > (ESURL_BEACON_DATA_MAX))
         {
@@ -488,7 +484,7 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
             
             /* Updated the URL in the beacon structure */
             MemCopy(g_esurl_beacon_adv.name.name_data, p_value, name_data_size);
-            g_esurl_beacon_adv.adv_length = name_data_size + BEACON_DATA_HDR_SIZE;
+            g_esurl_beacon_adv.name_length = name_data_size + BEACON_NAME_HDR_SIZE;
             
             /* Write the new data service size into the ADV header */
             g_esurl_beacon_adv.name.service_name_length =
@@ -515,7 +511,7 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
             
             /* Updated the URL in the beacon structure */
             MemCopy(g_esurl_beacon_adv.data.uri_data, p_value, uri_data_size);
-            g_esurl_beacon_adv.adv_length = uri_data_size + BEACON_DATA_HDR_SIZE;
+            g_esurl_beacon_adv.data_length = uri_data_size + BEACON_DATA_HDR_SIZE;
             
             /* Write the new data service size into the ADV header */
             g_esurl_beacon_adv.data.service_data_length =
@@ -689,8 +685,8 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
 extern void EsurlBeaconGetName(uint8** name, uint8* name_size)
 {
     /* return current values */
-    *name = (uint8*) &g_esurl_beacon_adv.name.name_data;
-    *name_size = g_esurl_beacon_adv.name.service_name_length;
+    *name = (uint8*) &g_esurl_beacon_adv.name;
+    *name_size = g_esurl_beacon_adv.name_length;
 }
 
 /*----------------------------------------------------------------------------*
@@ -706,8 +702,8 @@ extern void EsurlBeaconGetName(uint8** name, uint8* name_size)
 extern void EsurlBeaconGetData(uint8** data, uint8* data_size)
 {
     /* return current values */
-    *data = (uint8*) &g_esurl_beacon_adv.data.uri_data;
-    *data_size = g_esurl_beacon_adv.data.service_data_length;
+    *data = (uint8*) &g_esurl_beacon_adv.data;
+    *data_size = g_esurl_beacon_adv.data_length;
 }
 
 /*----------------------------------------------------------------------------*
