@@ -55,6 +55,8 @@
 #include "beaconing.h"      /* Beaconing routines */
 #include "nvm_access.h"     /* Non-volatile memory access */
 #include "app_gatt_db.h"    /* GATT database definitions */
+#include "temperature_service.h"
+#include "battery_service.h"
 
 /*============================================================================*
  *  Constants Arrays  
@@ -92,7 +94,7 @@ unsigned char adv_service_data_hdr[] =
         };
 
 /* Initialise Uri to http://betrack.co for a new beacon (using compression) */
-unsigned char initial_uri[] =
+unsigned char initial_data[] =
 {
     0x02, 'b', 'e', 't', 'r', 'a', 'c', 'k' 
         };
@@ -265,9 +267,9 @@ extern void EsurlBeaconInitChipReset(void)
     /* Initialize uri_data memory in adv: 0 - 18 bytes */
     MemSet(g_esurl_beacon_adv.data.uri_data, 0, ESURL_BEACON_DATA_MAX); 
     /* Initialize uri_data with a URI:  http://betrack.co */
-    MemCopy(g_esurl_beacon_adv.data.uri_data, initial_uri, sizeof(initial_uri)); 
-    g_esurl_beacon_adv.data.service_data_length = SERVICE_DATA_PRE_URI_SIZE + sizeof(initial_uri);
-    g_esurl_beacon_adv.data_length = BEACON_DATA_HDR_SIZE + sizeof(initial_uri);   
+    MemCopy(g_esurl_beacon_adv.data.uri_data, initial_data, sizeof(initial_data)); 
+    g_esurl_beacon_adv.data.service_data_length = SERVICE_DATA_PRE_URI_SIZE + sizeof(initial_data);
+    g_esurl_beacon_adv.data_length = BEACON_DATA_HDR_SIZE + sizeof(initial_data);   
 
     /* Managagement Data: Not included in transmitted ADV packet */
     

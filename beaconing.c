@@ -52,8 +52,6 @@
  *===========================================================================*/
 
 #include "esurl_beacon_service.h" /* Interface to this file */
-#include "temperature_service.h"
-#include "battery_service.h"
 #include "beaconing.h"      /* Beaconing routines */
 
 /*=============================================================================*
@@ -150,6 +148,8 @@ extern void BeaconStart(bool start)
             LsStoreAdvScanData(offset, advData, ad_src_advertise);
         }
 
+        /* update the beaconing data */
+        EsurlBeaconUpdateData();
         /* get the beaconing data USING SERVICE */
         EsurlBeaconGetData(&beacon_data, &beacon_data_size);
         

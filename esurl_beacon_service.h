@@ -147,6 +147,9 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind);
 extern void EsurlBeaconGetName(uint8** name, uint8* name_size);
 
 /* Returns the current value of the beacon data */
+extern void EsurlBeaconUpdateData(void);
+
+/* Returns the current value of the beacon data */
 extern void EsurlBeaconGetData(uint8** data, uint8* data_size);
 
 /* Returns the current value of the beacon period */
