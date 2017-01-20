@@ -50,6 +50,9 @@
  *  Public Function Prototypes
  *============================================================================*/
 
+/* Read the battery level */
+uint8 readBatteryLevel(void);
+
 /* Initialise the Battery Service data structure.*/
 extern void BatteryDataInit(void);
 

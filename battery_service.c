@@ -105,11 +105,12 @@ static BATT_DATA_T g_batt_data;
  *  Private Function Prototypes
  *===========================================================================*/
 
-/* Read the battery level */
-static uint8 readBatteryLevel(void);
-
 /*============================================================================*
  *  Private Function Implementations
+ *===========================================================================*/
+
+/*============================================================================*
+ *  Public Function Implementations
  *===========================================================================*/
 
 /*----------------------------------------------------------------------------*
@@ -125,7 +126,7 @@ static uint8 readBatteryLevel(void);
  *  RETURNS
  *      Battery level in percent
  *----------------------------------------------------------------------------*/
-static uint8 readBatteryLevel(void)
+uint8 readBatteryLevel(void)
 {
     uint32 bat_voltage;                 /* Battery voltage in mV */
     uint32 bat_level;                   /* Battery level in percent */
@@ -154,10 +155,6 @@ static uint8 readBatteryLevel(void)
     /* Return the battery level (as a percentage of full) */
     return (uint8)bat_level;
 }
-
-/*============================================================================*
- *  Public Function Implementations
- *===========================================================================*/
 
 /*----------------------------------------------------------------------------*
  *  NAME
