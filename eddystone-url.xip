@@ -27,6 +27,7 @@
   <file path="battery_service.h" />
   <file path="temperature_service.h" />
   <file path="battery_uuids.h" />
+  <file path="temperature_uuids.h" />
   <file path="esurl_beacon.h" />
   <file path="beaconing.h" />
   <file path="buzzer.h" />

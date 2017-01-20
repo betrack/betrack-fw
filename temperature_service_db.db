@@ -37,10 +37,10 @@
  
  *
  *****************************************************************************/
-#ifndef __BATTERY_SERVICE_DB__
-#define __BATTERY_SERVICE_DB__
+#ifndef __TEMPERATURE_SERVICE_DB__
+#define __TEMPERATURE_SERVICE_DB__
 
-#include "battery_uuids.h"
+#include "temperature_uuids.h"
 #include "user_config.h"
 
 /* For service details, refer http://developer.bluetooth.org/gatt/services/
@@ -49,8 +49,8 @@
 
 /* Primary service declaration of Battery service */
 primary_service {
-    uuid : UUID_BATTERY_SERVICE,
-    name : "BATTERY_SERVICE", /* Name will be used in handle name macro */
+    uuid : UUID_TEMPERATURE_SERVICE,
+    name : "TEMPERATURE_SERVICE", /* Name will be used in handle name macro */
 
     /* Battery level characteristic */
 
@@ -59,8 +59,8 @@ primary_service {
      */
     
     characteristic {
-        uuid : UUID_BATTERY_LEVEL,
-        name : "BATT_LEVEL",
+        uuid : UUID_TEMPERATURE,
+        name : "TEMP",
 #ifdef PAIRING_SUPPORT
         flags : [FLAG_IRQ, FLAG_ENCR_R],
 #else
@@ -75,9 +75,9 @@ primary_service {
 #else
         flags : [FLAG_IRQ],
 #endif /*PAIRING_SUPPORT*/
-            name : "BATT_LEVEL_C_CFG"
+            name : "TEMP_C_CFG"
         }
             
     }      
 },
-#endif /* __BATTERY_SERVICE_DB__ */
+#endif /* __TEMPERATURE_SERVICE_DB__ */
