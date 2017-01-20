@@ -117,9 +117,6 @@ extern void TemperatureDataInit(void)
          */
         g_temp_data.temp_client_config = gatt_client_config_none;
     }
-    int16 t = readTemperature();
-    t += 1;
-    t -= 1;
 }
 
 /*----------------------------------------------------------------------------*

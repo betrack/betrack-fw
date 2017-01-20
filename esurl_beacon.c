@@ -1233,6 +1233,10 @@ static void handleSignalLMEncryptionChange(
                      */
                     BatteryUpdateLevel(g_app_data.st_ucid);
 
+                    /* Update Temperature
+                     */
+                    TemperatureUpdate(g_app_data.st_ucid);
+
                     /* If the current connection parameters being used don't 
                      * comply with the application's preferred connection 
                      * parameters and the timer is not running, start a timer
@@ -1884,6 +1888,9 @@ extern void SetState(app_state new_state)
                  * depend upon application requirements 
                  */
                 BatteryUpdateLevel(g_app_data.st_ucid);
+                /* Update Temperature
+                */
+                TemperatureUpdate(g_app_data.st_ucid);
 #endif /* PAIRING_SUPPORT */
 
 #if defined(CONNECTED_IDLE_TIMEOUT_VALUE)
@@ -2277,6 +2284,7 @@ void AppProcessSystemEvent(sys_event_id id, void *data)
             if(g_app_data.state == app_state_connected)
             {
                 BatteryUpdateLevel(g_app_data.st_ucid);
+                TemperatureUpdate(g_app_data.st_ucid);
             }
         }
         break;
