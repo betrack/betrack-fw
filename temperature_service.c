@@ -89,7 +89,7 @@ static TEMP_DATA_T g_temp_data;
  *  RETURNS
  *      Temperature
  *----------------------------------------------------------------------------*/
-static int16 readTemperature(void)
+int16 readTemperature(void)
 {
     /* Return the Temperature */
     return ThermometerReadTemperature();

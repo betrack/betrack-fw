@@ -22,7 +22,7 @@
  *  Public Function Prototypes
  *============================================================================*/
 /* Read the Temperature level */
-static int16 readTemperature(void);
+int16 readTemperature(void);
 
 /* Initialise the Temperature Service data structure.*/
 extern void TemperatureDataInit(void);
