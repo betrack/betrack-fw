@@ -86,8 +86,8 @@ extern void BeaconStart(bool start)
 {
     uint8 advData[ADVERT_SIZE];
     uint16 offset = 0;
-    //uint8* beacon_name;
-    //uint8 beacon_name_size;
+    uint8* beacon_name;
+    uint8 beacon_name_size;
     uint8* beacon_data;
     uint8 beacon_data_size;
     uint8 i;

@@ -74,9 +74,7 @@ unsigned char adv_service_hdr[] =
 /* Esurl Beacon Service Local Name Param and Bluetooth SIG assigned 16-bit UUID */
 unsigned char adv_service_name_hdr[] = 
 {
-    0x08, // AD Type: Shortened Local Name
-            0xAA, // Esurl Beacon Service Data UUID LSB
-            0xFE  // Esurl Beacon Service Data UUID MSB
+    0x08 // AD Type: Shortened Local Name
         };
 
 /* Initialise Name to Betrack tag*/
@@ -250,30 +248,30 @@ extern void EsurlBeaconInitChipReset(void)
     /* Init the ADV name */
     
     /* Init Beacon name hdr: 10 bytes*/
-    /*MemCopy(g_esurl_beacon_adv.name.service_hdr, adv_service_hdr, sizeof(adv_service_hdr));
+    MemCopy(g_esurl_beacon_adv.name.service_hdr, adv_service_hdr, sizeof(adv_service_hdr));
     g_esurl_beacon_adv.name.service_name_length = SERVICE_NAME_PRE_URI_SIZE;
-    MemCopy(g_esurl_beacon_adv.name.service_name_hdr, adv_service_name_hdr, sizeof(adv_service_name_hdr)); */   
+    MemCopy(g_esurl_beacon_adv.name.service_name_hdr, adv_service_name_hdr, sizeof(adv_service_name_hdr));  
     
     /* Initialize name_data memory in adv: 0 - 18 bytes */
-    //MemSet(g_esurl_beacon_adv.name.name_data, 0, ESURL_BEACON_DATA_MAX); 
+    MemSet(g_esurl_beacon_adv.name.name_data, 0, ESURL_BEACON_DATA_MAX); 
     /* Initialize name_data with name:  Betrack tag */
-    /*MemCopy(g_esurl_beacon_adv.name.name_data, initial_name, sizeof(initial_name)); 
+    MemCopy(g_esurl_beacon_adv.name.name_data, initial_name, sizeof(initial_name)); 
     g_esurl_beacon_adv.name.service_name_length = SERVICE_NAME_PRE_URI_SIZE + sizeof(initial_name);
-    g_esurl_beacon_adv.adv_length = BEACON_DATA_HDR_SIZE + sizeof(initial_name);*/
+    g_esurl_beacon_adv.adv_length = BEACON_DATA_HDR_SIZE + sizeof(initial_name);
 
     /* Init the ADV data */
     
     /* Init Beacon data hdr: 10 bytes*/
     MemCopy(g_esurl_beacon_adv.data.service_hdr, adv_service_hdr, sizeof(adv_service_hdr));
     g_esurl_beacon_adv.data.service_data_length = SERVICE_DATA_PRE_URI_SIZE;
-    MemCopy(g_esurl_beacon_adv.data.service_data_hdr, adv_service_data_hdr, sizeof(adv_service_data_hdr));    
+    MemCopy(g_esurl_beacon_adv.data.service_data_hdr, adv_service_data_hdr, sizeof(adv_service_data_hdr));   
     
     /* Initialize uri_data memory in adv: 0 - 18 bytes */
     MemSet(g_esurl_beacon_adv.data.uri_data, 0, ESURL_BEACON_DATA_MAX); 
     /* Initialize uri_data with a URI:  http://betrack.co */
     MemCopy(g_esurl_beacon_adv.data.uri_data, initial_uri, sizeof(initial_uri)); 
     g_esurl_beacon_adv.data.service_data_length = SERVICE_DATA_PRE_URI_SIZE + sizeof(initial_uri);
-    g_esurl_beacon_adv.adv_length = BEACON_DATA_HDR_SIZE + sizeof(initial_uri);    
+    g_esurl_beacon_adv.adv_length = BEACON_DATA_HDR_SIZE + sizeof(initial_uri);   
     
     /* Managagement Data: Not included in transmitted ADV packet */
     
