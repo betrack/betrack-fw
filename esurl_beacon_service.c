@@ -267,7 +267,7 @@ extern void EsurlBeaconInitChipReset(void)
     /* Initialize uri_data with a URI:  http://betrack.co */
     MemCopy(g_esurl_beacon_adv.data.uri_data, initial_uri, sizeof(initial_uri)); 
     g_esurl_beacon_adv.data.service_data_length = SERVICE_DATA_PRE_URI_SIZE + sizeof(initial_uri);
-    g_esurl_beacon_adv._length = BEACON_DATA_HDR_SIZE + sizeof(initial_uri);   
+    g_esurl_beacon_adv.data_length = BEACON_DATA_HDR_SIZE + sizeof(initial_uri);   
 
     /* Managagement Data: Not included in transmitted ADV packet */
     
