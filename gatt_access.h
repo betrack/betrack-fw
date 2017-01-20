@@ -105,7 +105,7 @@ typedef enum
 /* The following macro definition should be included only if a user wants the
  * application to have a static random address.
  */
-#define USE_STATIC_RANDOM_ADDRESS
+/* #define USE_STATIC_RANDOM_ADDRESS */
 
 /* Timer value for remote device to re-encrypt the link using old keys */
 #define BONDING_CHANCE_TIMER            (30*SECOND)
