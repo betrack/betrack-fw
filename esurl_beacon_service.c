@@ -338,7 +338,7 @@ extern void EsurlBeaconHandleAccessRead(GATT_ACCESS_IND_T *p_ind)
         p_val = &g_esurl_beacon_adv.tx_power_mode;
         break;        
         
-    case HANDLE_ESURL_BEACON_NAME_DATA:
+    case HANDLE_DEVICE_NAME:
         
         name_data_size = g_esurl_beacon_adv.adv_length - BEACON_DATA_HDR_SIZE; 
         /* Return the beacon data & protect against overflow */
@@ -472,7 +472,7 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
         }
         break;
         
-    case HANDLE_ESURL_BEACON_NAME_DATA:
+    case HANDLE_DEVICE_NAME:
         if (g_esurl_beacon_adv.lock_state) {
             rc = gatt_status_insufficient_authorization;
         } 

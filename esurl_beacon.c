@@ -378,6 +378,9 @@ static void appDataInit(void)
     GapDataInit();
 
     /* Battery Service data initialisation */
+    TemperatureDataInit();
+
+    /* Battery Service data initialisation */
     BatteryDataInit();
 
     /* Beacon Service data initialisation */
@@ -1385,6 +1388,7 @@ static void handleSignalSmSimplePairingCompleteInd(
                  * longer bonded to the remote host.
                  */
                 GapDataInit();
+                TemperatureDataInit();
                 BatteryDataInit();
                 EsurlBeaconDataInit();
                 
