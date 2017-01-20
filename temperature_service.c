@@ -32,8 +32,8 @@
 /* Temperature Service data type */
 typedef struct _TEMP_DATA_T
 {
-    /* Temperature Level in percent */
-    uint8   temp;
+    /* Temperature */
+    int16   temp;
 
     /* Client configuration descriptor for Temperature Level characteristic */
     gatt_client_config temp_client_config;
@@ -68,14 +68,15 @@ static TEMP_DATA_T g_temp_data;
  *  Private Function Prototypes
  *===========================================================================*/
 
-/* Read the Temperature level */
-static int16 readTemperature(void);
-
 /*============================================================================*
  *  Private Function Implementations
  *===========================================================================*/
 
-/*----------------------------------------------------------------------------*
+/*============================================================================*
+ *  Public Function Implementations
+ *===========================================================================*/
+
+ /*----------------------------------------------------------------------------*
  *  NAME
  *      readTemperature
  *
@@ -93,10 +94,6 @@ static int16 readTemperature(void)
     /* Return the Temperature */
     return ThermometerReadTemperature();
 }
-
-/*============================================================================*
- *  Public Function Implementations
- *===========================================================================*/
 
 /*----------------------------------------------------------------------------*
  *  NAME
@@ -208,6 +205,51 @@ extern void TemperatureWriteDataToNVM(uint16 *p_offset)
      * by the Beacon Service 
      */
     *p_offset += TEMPERATURE_SERVICE_NVM_MEMORY_WORDS;
+}
+
+/*----------------------------------------------------------------------------*
+ *  NAME
+ *      TemperatureUpdate
+ *
+ *  DESCRIPTION
+ *      This function is to monitor the temperature and trigger notifications
+ *      (if configured) to the connected host.
+ *
+ *  PARAMETERS
+ *      ucid [in]               Connection ID of the host
+ *
+ *  RETURNS
+ *      Nothing
+ *----------------------------------------------------------------------------*/
+extern void TemperatureUpdate(uint16 ucid)
+{
+    int16 cur_temp;                /* Current temperature */
+    int16 old_temp;                /* Previous temperature */
+
+    /* Read the battery level */
+    cur_temp = readTemperature();
+
+    old_temp = g_temp_data.temp;
+
+    /* If the current and old battery level are not same, update the  connected
+     * host if notifications are configured.
+     */
+    if(old_temp != cur_temp)
+    {
+
+        if((ucid != GATT_INVALID_UCID) &&
+           (g_temp_data.temp_client_config == gatt_client_config_notification))
+        {
+
+            //GattCharValueNotification(ucid, 
+            //                         HANDLE_BATT_LEVEL, 
+            //                                     1, &cur_bat_level);
+
+            /* Update Battery Level characteristic in database */
+            g_temp_data.temp = cur_temp;
+
+        }
+    }
 }
 
 /*----------------------------------------------------------------------------*
