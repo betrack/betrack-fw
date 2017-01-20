@@ -52,6 +52,8 @@
  *===========================================================================*/
 
 #include "esurl_beacon_service.h" /* Interface to this file */
+#include "temperature_service.h"
+#include "battery_service.h"
 #include "beaconing.h"      /* Beaconing routines */
 
 /*=============================================================================*

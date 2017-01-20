@@ -21,6 +21,8 @@
 /*============================================================================*
  *  Public Function Prototypes
  *============================================================================*/
+/* Read the Temperature level */
+static int16 readTemperature(void);
 
 /* Initialise the Temperature Service data structure.*/
 extern void TemperatureDataInit(void);
@@ -28,29 +30,16 @@ extern void TemperatureDataInit(void);
 /* Initialise the Temperature Service data structure at chip reset */
 extern void TemperatureInitChipReset(void);
 
-/* Handle read operations on Temperature Service attributes maintained by the
- * application
- */
-extern void TemperatureHandleAccessRead(GATT_ACCESS_IND_T *p_ind);
-
-/* Handle write operations on Temperature Service attributes maintained by the
- * application
- */
-extern void TemperatureHandleAccessWrite(GATT_ACCESS_IND_T *p_ind);
-
-/* Monitor the Temperature level and trigger notifications (if configured) to the
- * connected host
- */
-extern void TemperatureUpdateLevel(uint16 ucid);
-
 /* Read the Temperature Service specific data stored in NVM */
 extern void TemperatureReadDataFromNVM(uint16 *p_offset);
 
 /* Write the Temperature Service specific data to NVM */
 extern void TemperatureWriteDataToNVM(uint16 *p_offset);
 
-/* Check if the handle belongs to the Temperature Service */
-extern bool TemperatureCheckHandleRange(uint16 handle);
+/* Monitor the temperature and trigger notifications (if configured) to the
+ * connected host
+ */
+extern void TemperatureUpdate(uint16 ucid);
 
 /* Notify bonding status to the Temperature Service */
 extern void TemperatureBondingNotify(void);

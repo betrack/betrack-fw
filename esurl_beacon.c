@@ -507,6 +507,7 @@ static void readPersistentStore(void)
          */
         GapInitWriteDataToNVM(&nvm_offset);
         BatteryWriteDataToNVM(&nvm_offset);       
+        TemperatureWriteDataToNVM(&nvm_offset);       
         EsurlBeaconWriteDataToNVM(&nvm_offset);
     }
 
@@ -517,6 +518,7 @@ static void readPersistentStore(void)
     nvm_offset = NVM_MAX_APP_MEMORY_WORDS;    
     GapReadDataFromNVM(&nvm_offset);   
     BatteryReadDataFromNVM(&nvm_offset);
+    TemperatureReadDataFromNVM(&nvm_offset);
     EsurlBeaconReadDataFromNVM(&nvm_offset);
     
     
@@ -1324,6 +1326,7 @@ static void handleSignalSmSimplePairingCompleteInd(
                  * required data to NVM.
                  */
                 BatteryBondingNotify();
+                TemperatureBondingNotify();
                 EsurlBeaconBondingNotify();         
                 
                 /* Add the Service Bonding Notify API here */
