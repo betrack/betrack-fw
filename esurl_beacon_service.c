@@ -689,8 +689,8 @@ extern void EsurlBeaconHandleAccessWrite(GATT_ACCESS_IND_T *p_ind)
 extern void EsurlBeaconGetName(uint8** name, uint8* name_size)
 {
     /* return current values */
-    *name = (uint8*) &g_esurl_beacon_adv.name;
-    *name_size = g_esurl_beacon_adv.adv_length;
+    *name = (uint8*) &g_esurl_beacon_adv.name.name_data;
+    *name_size = g_esurl_beacon_adv.name.service_name_length;
 }
 
 /*----------------------------------------------------------------------------*
@@ -706,8 +706,8 @@ extern void EsurlBeaconGetName(uint8** name, uint8* name_size)
 extern void EsurlBeaconGetData(uint8** data, uint8* data_size)
 {
     /* return current values */
-    *data = (uint8*) &g_esurl_beacon_adv.data;
-    *data_size = g_esurl_beacon_adv.adv_length;
+    *data = (uint8*) &g_esurl_beacon_adv.data.uri_data;
+    *data_size = g_esurl_beacon_adv.data.service_data_length;
 }
 
 /*----------------------------------------------------------------------------*
