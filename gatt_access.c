@@ -65,7 +65,6 @@
 #include "esurl_beacon_service.h"/* Beacon2 Service interface */
 #include "esurl_beacon_uuids.h"  /* Battery Service UUIDs */
 #include "battery_uuids.h"    /* Battery Service UUIDs */
-#include "temperature_uuids.h"    /* Temperature Service UUIDs */
 #include "dev_info_uuids.h"   /* Device Information Service UUIDs */
 #include "dev_info_service.h" /* Device Information Service interface */
 #include "debug_interface.h"  /* Debug serial-port for adding print statements */
