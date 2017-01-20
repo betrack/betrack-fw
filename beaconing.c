@@ -125,11 +125,11 @@ extern void BeaconStart(bool start)
 
         if(beacon_name_size > 0)
         {
-            adv_parameter_len = beacon_name[0];
+            adv_parameter_len = beacon_name_size;
             len_i = adv_parameter_len - 1;
             
             /* and store in the packet */
-            for(i = 1; (i < beacon_name_size) && (offset < ADVERT_SIZE); i++,offset++, len_i--)
+            for(i = 0; (i < beacon_name_size) && (offset < ADVERT_SIZE); i++,offset++, len_i--)
             {
                 advData[offset] = beacon_name[i];
                 
@@ -155,11 +155,11 @@ extern void BeaconStart(bool start)
         
         if(beacon_data_size > 0)
         {
-            adv_parameter_len = beacon_data[0];
+            adv_parameter_len = beacon_data_size;
             len_i = adv_parameter_len - 1;
             
             /* and store in the packet */
-            for(i = 1; (i < beacon_data_size) && (offset < ADVERT_SIZE); i++,offset++, len_i--)
+            for(i = 0; (i < beacon_data_size) && (offset < ADVERT_SIZE); i++,offset++, len_i--)
             {
                 advData[offset] = beacon_data[i];
                 
