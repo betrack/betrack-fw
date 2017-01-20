@@ -1,5 +1,6 @@
 *.si
 *.lst
+depend_Debug_CSR101x_A05/*
 depend_Release_CSR101x_A05/*
 *.mak
 *.elf
