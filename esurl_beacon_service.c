@@ -79,10 +79,10 @@ unsigned char adv_service_name_hdr[] =
     0x08 // AD Type: Shortened Local Name
         };
 
-/* Initialise Name to Betrack tag*/
+/* Initialise Name to Bt for Betrack*/
 unsigned char initial_name[] =
 {
-    'B', 'e' 
+    'B', 't' 
         };
 
 /* Esurl Beacon Service Data Param and Bluetooth SIG assigned 16-bit UUID */
@@ -93,10 +93,10 @@ unsigned char adv_service_data_hdr[] =
             0xFE  // Esurl Beacon Service Data UUID MSB
         };
 
-/* Initialise Uri to http://betrack.co for a new beacon (using compression) */
+/* Initialise Uri to Battery and temperature spaces */
 unsigned char initial_data[] =
 {
-    'T', 0x00, 0x00, 'B', 0x00 
+    'B', 0x00, 't', 0x00, 0x00 
         };
 
 //Original: 0x02, 'p', 'h', 'y', 's', 'i', 'c', 'a', 'l', '-', 'w', 'e', 'b', 0x08
@@ -266,7 +266,7 @@ extern void EsurlBeaconInitChipReset(void)
     
     /* Initialize uri_data memory in adv: 0 - 18 bytes */
     MemSet(g_esurl_beacon_adv.data.uri_data, 0, ESURL_BEACON_DATA_MAX); 
-    /* Initialize uri_data with a URI:  http://betrack.co */
+    /* Initialize uri_data with initial data */
     MemCopy(g_esurl_beacon_adv.data.uri_data, initial_data, sizeof(initial_data)); 
     g_esurl_beacon_adv.data.service_data_length = SERVICE_DATA_PRE_URI_SIZE + sizeof(initial_data);
     g_esurl_beacon_adv.data_length = BEACON_DATA_HDR_SIZE + sizeof(initial_data);   
@@ -704,11 +704,11 @@ extern void EsurlBeaconGetName(uint8** name, uint8* name_size)
 extern void EsurlBeaconUpdateData(void)
 {
     /* Update the ADV data */
-    int16 temp = readTemperature();
     uint8 batt = readBatteryLevel(); 
+    int16 temp = readTemperature();
     /* Update uri_data with a URI:  http://betrack.co */
-    MemCopy(g_esurl_beacon_adv.data.uri_data+1, &temp, sizeof(temp));
-    MemCopy(g_esurl_beacon_adv.data.uri_data+3, &batt, sizeof(batt));
+    MemCopy(g_esurl_beacon_adv.data.uri_data+1, &batt, sizeof(batt));
+    MemCopy(g_esurl_beacon_adv.data.uri_data+3, &temp, sizeof(temp));
 }
 
 /*----------------------------------------------------------------------------*
