@@ -71,7 +71,7 @@
 
 /* length of service data hdr before URI */
 #define BEACON_DATA_HDR_SIZE (10)
-#define BEACON_NAME_HDR_SIZE (10)
+#define BEACON_NAME_HDR_SIZE (7)
 #define ESURL_BEACON_DATA_MAX (18)
 #define ESURL_BEACON_NAME_MAX (18)
 #define SERVICE_DATA_PRE_URI_SIZE (5)
