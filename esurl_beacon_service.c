@@ -80,7 +80,7 @@ unsigned char adv_service_name_hdr[] =
 /* Initialise Name to Betrack tag*/
 unsigned char initial_name[] =
 {
-    'B', 'e', 't', 'r', 'a', 'c', 'k', ' ', 't', 'a', 'g' 
+    'B', 'e' 
         };
 
 /* Esurl Beacon Service Data Param and Bluetooth SIG assigned 16-bit UUID */
@@ -94,7 +94,7 @@ unsigned char adv_service_data_hdr[] =
 /* Initialise Uri to http://betrack.co for a new beacon (using compression) */
 unsigned char initial_uri[] =
 {
-    0x02, 'b', 'e', 't', 'r', 'a', 'c', 'k', '.', 'c', 'o' 
+    0x02, 'b', 'e', 't', 'r', 'a', 'c', 'k' 
         };
 
 //Original: 0x02, 'p', 'h', 'y', 's', 'i', 'c', 'a', 'l', '-', 'w', 'e', 'b', 0x08

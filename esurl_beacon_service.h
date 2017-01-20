@@ -75,7 +75,7 @@
 #define ESURL_BEACON_DATA_MAX (18)
 #define ESURL_BEACON_NAME_MAX (18)
 #define SERVICE_DATA_PRE_URI_SIZE (5)
-#define SERVICE_NAME_PRE_URI_SIZE (5)
+#define SERVICE_NAME_PRE_URI_SIZE (1)
 #define ESURL_BEACON_FLAGS_SIZE (1) 
 
 /* Size of array definitions for uribeacon data structure */
