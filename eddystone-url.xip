@@ -51,6 +51,7 @@
  <folder name="GATT db files" >
   <extension name="db" />
   <file path="battery_service_db.db" />
+  <file path="temperature_service_db.db" />
   <file path="app_gatt_db.db" />
   <file path="dev_info_service_db.db" />
   <file path="gap_service_db.db" />
