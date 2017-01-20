@@ -96,7 +96,7 @@ unsigned char adv_service_data_hdr[] =
 /* Initialise Uri to http://betrack.co for a new beacon (using compression) */
 unsigned char initial_data[] =
 {
-    0x02, 'b', 'e', 't', 'r', 'a', 'c', 'k' 
+    'T', 0x00, 0x00, 'B', 0x00 
         };
 
 //Original: 0x02, 'p', 'h', 'y', 's', 'i', 'c', 'a', 'l', '-', 'w', 'e', 'b', 0x08
@@ -689,6 +689,26 @@ extern void EsurlBeaconGetName(uint8** name, uint8* name_size)
     /* return current values */
     *name = (uint8*) &g_esurl_beacon_adv.name;
     *name_size = g_esurl_beacon_adv.name_length;
+}
+
+/*----------------------------------------------------------------------------*
+ *  NAME
+ *      EsurlBeaconGetName
+ *
+ *  DESCRIPTION
+ *      This function returns the current value of the beacon name
+ *
+ *  RETURNS
+ *      Nothing
+ *----------------------------------------------------------------------------*/
+extern void EsurlBeaconUpdateData(void)
+{
+    /* Update the ADV data */
+    int16 temp = readTemperature();
+    uint8 batt = readBatteryLevel(); 
+    /* Update uri_data with a URI:  http://betrack.co */
+    MemCopy(g_esurl_beacon_adv.data.uri_data+1, &temp, sizeof(temp));
+    MemCopy(g_esurl_beacon_adv.data.uri_data+3, &batt, sizeof(batt));
 }
 
 /*----------------------------------------------------------------------------*
