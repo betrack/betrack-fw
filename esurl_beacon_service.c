@@ -289,8 +289,8 @@ extern void EsurlBeaconInitChipReset(void)
     /* Update ADV pkt and RADIO based on the TX power mode default */
     EsurlBeaconUpdateTxPowerFromMode(TX_POWER_MODE_DEFAULT);    
     
-    /* Set default period = 15 seconds */
-    g_esurl_beacon_adv.period = 15000;
+    /* Set default period = 10 seconds */
+    g_esurl_beacon_adv.period = 10000;
     
     /* Flag data structure needs writing to NVM */
     g_esurl_beacon_nvm_write_flag = TRUE;    
