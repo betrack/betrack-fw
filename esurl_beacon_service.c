@@ -93,10 +93,10 @@ unsigned char adv_service_data_hdr[] =
             0xFE  // Esurl Beacon Service Data UUID MSB
         };
 
-/* Initialise Uri to Battery and temperature spaces */
+/* Initialise Uri to Battery, temperature and packet spaces */
 unsigned char initial_data[] =
 {
-    'B', 0x00, 't', 0x00, 0x00 
+    'B', 0x00, 't', 0x00, 0x00 , 'p', 0x00, 0x00, 0x00, 0x00
         };
 
 //Original: 0x02, 'p', 'h', 'y', 's', 'i', 'c', 'a', 'l', '-', 'w', 'e', 'b', 0x08
@@ -181,6 +181,9 @@ typedef struct _ESURL_BEACON_ADV_T
     
     /* Beacon period in milliseconds 0-65536ms */
     uint16 period;
+    
+    /* Packets sent */
+    uint32 packet;
     
 } ESURL_BEACON_ADV_T;
 
@@ -291,6 +294,9 @@ extern void EsurlBeaconInitChipReset(void)
     
     /* Set default period = 10 seconds */
     g_esurl_beacon_adv.period = 10000;
+    
+    /* Zero packet */
+    g_esurl_beacon_adv.packet = 0;
     
     /* Flag data structure needs writing to NVM */
     g_esurl_beacon_nvm_write_flag = TRUE;    
@@ -706,9 +712,28 @@ extern void EsurlBeaconUpdateData(void)
     /* Update the ADV data */
     uint8 batt = readBatteryLevel(); 
     int16 temp = readTemperature();
+    uint32 packet = (++g_esurl_beacon_adv.packet);
+    uint8 battsize = sizeof(batt);
+    uint8 tempsize = 2*sizeof(temp);
+    uint8 packetsize = 2*sizeof(packet);
     /* Update uri_data with a URI:  http://betrack.co */
-    MemCopy(g_esurl_beacon_adv.data.uri_data+1, &batt, sizeof(batt));
-    MemCopy(g_esurl_beacon_adv.data.uri_data+3, &temp, sizeof(temp));
+    uint8 i;
+    uint8 data;
+    for(i = battsize; i > 0; i--){
+        data = (uint8)batt;
+        MemCopy(g_esurl_beacon_adv.data.uri_data+0+i, &data, 1);
+        batt>>=8;
+    }
+    for(i = tempsize; i > 0; i-=sizeof(temp)){
+        data = (uint8)temp;
+        MemCopy(g_esurl_beacon_adv.data.uri_data+battsize+1+i, &data, 1);
+        temp>>=8;
+    }
+    for(i = packetsize; i > 0; i--){
+        data = (uint8)packet;
+        MemCopy(g_esurl_beacon_adv.data.uri_data+battsize+1+tempsize+1+i, &data, 1);
+        packet>>=8;
+    }
 }
 
 /*----------------------------------------------------------------------------*
