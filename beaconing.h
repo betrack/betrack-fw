@@ -54,7 +54,7 @@
 #define BEACON_DATA_SIZE                    (28)
 
 /* Beaconing advertising interval */
-#define BEACON_ADVERTISING_INTERVAL         (1 * SECOND)
+#define BEACON_ADVERTISING_INTERVAL         (10 * SECOND)
 
 /*============================================================================*
  *  Public Function Prototypes

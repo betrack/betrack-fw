@@ -53,8 +53,8 @@
  * is 1s to 2.5s. Vendors will need to tune these values as per their
  * requirements.
  */
-#define FC_ADVERTISING_INTERVAL_MIN         (100 * MILLISECOND)
-#define FC_ADVERTISING_INTERVAL_MAX         (100 * MILLISECOND)
+#define FC_ADVERTISING_INTERVAL_MIN         (1000 * MILLISECOND)
+#define FC_ADVERTISING_INTERVAL_MAX         (100000 * MILLISECOND)
 
 /* Maximum number of connection parameter update requests that can be sent when 
  * connected
@@ -71,8 +71,8 @@
  */
 
 /* Minimum and maximum connection interval in number of frames */
-#define PREFERRED_MAX_CON_INTERVAL          0x0190 /* 500 ms */
-#define PREFERRED_MIN_CON_INTERVAL          0x0190 /* 500 ms */
+#define PREFERRED_MAX_CON_INTERVAL          0xffff /* 500 ms */
+#define PREFERRED_MIN_CON_INTERVAL          0x1190 /* 500 ms */
 
 /* Slave latency in number of connection intervals */
 #define PREFERRED_SLAVE_LATENCY             0x0004 /* 4 conn_intervals */
