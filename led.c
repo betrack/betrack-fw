@@ -65,16 +65,27 @@
 #define LED_PWM_INDEX                (1)
 #define LED_PIO_MODE                 (pio_mode_pwm1)
 
-/* PWM parameters for LED */
+/* 
+*   PWM parameters for LED
+*   bool PioConfigPWM (uint16 pwm_id, pio_pwm_mode mode, uint8 low_on_time, uint8 low_off_time, uint8 low_hold_time, uint8 high_on_time, uint8 high_off_time, uint8 high_hold_time, uint8 ramp_rate) Allows the user application to configure the PIO's Pulse Width Modulation driver. 
+*   low_off_time the amount of time, in units of ~30us, for which the LED should be off during the lowest part of the flash sequence.
+*   low_on_time the amount of time, in units of ~30us, for which the LED should be on during the lowest part of the flash sequence.
+*   low_hold_time the amount of time, in units of ~16ms, for which the LED should be held in the lowest part of the flash sequence.
+*   high_off_time the amount of time, in units of ~30us, for which the LED should be off during the highest part of the flash sequence.
+*   high_on_time the amount of time, in units of ~30us, for which the LED should be on during the highest part of the flash sequence.
+*   high_hold_time the amount of time, in units of ~16ms, for which the LED should be held in the highest part of the flash sequence.
+*   ramp_rate the ramp rate for ramping between highness levels, in units of ~30us per step with 0 being instantaneous (no ramp).
+*/
+
 #define LOW_LED_OFF_TIME             (50)
-#define LOW_LED_ON_TIME              (1)
+#define LOW_LED_ON_TIME              (0)
 #define LOW_LED_HOLD_TIME            (50)
 
-#define HIGH_LED_OFF_TIME            (1)
-#define HIGH_LED_ON_TIME             (50)
-#define HIGH_LED_HOLD_TIME           (50)
+#define HIGH_LED_OFF_TIME            (0)
+#define HIGH_LED_ON_TIME             (255)
+#define HIGH_LED_HOLD_TIME           (255)
 
-#define LED_RAMP_RATE                (50)
+#define LED_RAMP_RATE                (0)
 
 /*============================================================================*
  *  Public Function Implementations

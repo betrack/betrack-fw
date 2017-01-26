@@ -1809,7 +1809,7 @@ extern void SetState(app_state new_state)
                 appExitAdvertising();
                 
                 /* stop LED indication */
-                LedEnable(FALSE);
+                /* LedEnable(FALSE); */
             break;
 
             case app_state_connected:
@@ -1849,7 +1849,7 @@ extern void SetState(app_state new_state)
                 SoundBuzzer(buzzer_beep_twice);
                 
                 /* start LED indication */
-                LedEnable(TRUE);
+                /* LedEnable(TRUE); */
             }
             break;
             
