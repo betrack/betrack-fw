@@ -223,8 +223,9 @@ static uint16 g_esurl_beacon_nvm_offset;
  *----------------------------------------------------------------------------*/
 extern void EsurlBeaconDataInit(void)
 {
-    /* Data initialized from NVM during readPersistentStore */
-    
+    /* Zero packet */
+    g_esurl_beacon_adv.packet = 0;
+    /* Data initialized from NVM during readPersistentStore */    
 }
 
 /*----------------------------------------------------------------------------*
@@ -294,9 +295,6 @@ extern void EsurlBeaconInitChipReset(void)
     
     /* Set default period = 10 seconds */
     g_esurl_beacon_adv.period = 10000;
-    
-    /* Zero packet */
-    g_esurl_beacon_adv.packet = 0;
     
     /* Flag data structure needs writing to NVM */
     g_esurl_beacon_nvm_write_flag = TRUE;    
