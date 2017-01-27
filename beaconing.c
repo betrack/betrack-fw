@@ -42,6 +42,7 @@
 #include <gatt.h>           /* GATT application interface */
 #include <buf_utils.h>      /* Buffer functions */
 #include <mem.h>            /* Memory routines */
+#include <timer.h>
 #include <gatt_prim.h>
 #include <gatt_uuid.h>
 #include <ls_app_if.h>
@@ -51,6 +52,7 @@
  *  Local Header Files
  *===========================================================================*/
 
+#include "esurl_beacon.h" /* Interface to this file */
 #include "esurl_beacon_service.h" /* Interface to this file */
 #include "beaconing.h"      /* Beaconing routines */
 
@@ -66,8 +68,174 @@
 #define ADVERT_SIZE                     (28)
 
 /*============================================================================*
+ *  Private data
+ *============================================================================*/
+
+/* Timer for the beaconing instance */
+static timer_id     beacon_tid;
+
+/*============================================================================*
+ *  Private Function Prototypes
+ *===========================================================================*/
+
+/* Control beacon at timer expiry */
+static void appBeaconTimerHandler(timer_id tid);
+/* Beacon update data to LS adv storage */
+static uint32 BeaconUpdateData(void);
+
+/*============================================================================*
+ *  Private Function Implementations
+ *============================================================================*/
+
+/*----------------------------------------------------------------------------*
+ *  NAME
+ *      appBuzzerTimerHandler
+ *
+ *  DESCRIPTION
+ *      This function is used to stop the Buzzer at the expiry of timer.
+ *
+ *  PARAMETERS
+ *      tid [in]                ID of expired timer (unused)
+ *
+ *  RETURNS
+ *      Nothing
+ *----------------------------------------------------------------------------*/
+static void appBeaconTimerHandler(timer_id tid)
+{
+    if(tid == beacon_tid)
+    {
+        uint32 beacon_interval = BeaconUpdateData();
+    
+        /* Loop the beacon timer */
+        beacon_tid = TimerCreate(beacon_interval, TRUE, appBeaconTimerHandler);
+    }   
+}
+
+/*----------------------------------------------------------------------------*
+ *  NAME
+ *      BeaconUpdateData
+ *
+ *  DESCRIPTION
+ *      This function is used to stop update the data to LS adv storage
+ *
+ *  PARAMETERS
+ *      Nothing
+ *
+ *  RETURNS
+ *      Nothing
+ *----------------------------------------------------------------------------*/
+static uint32 BeaconUpdateData(void)
+{
+    uint8 advData[ADVERT_SIZE];
+    uint16 offset = 0;
+    uint8* beacon_name;
+    uint8 beacon_name_size;
+    uint8* beacon_data;
+    uint8 beacon_data_size;
+    uint8 i;
+    uint8 len_i = 0;
+    uint8 adv_parameter_len = 0;
+    
+    uint32 beacon_interval = EsurlBeaconGetPeriodMillis();
+    
+    /* clear the existing advertisement and scan response data */
+    LsStoreAdvScanData(0, NULL, ad_src_advertise);
+    LsStoreAdvScanData(0, NULL, ad_src_scan_rsp);
+
+    /* set the advertisement interval */
+
+    GapSetAdvInterval(beacon_interval, beacon_interval);
+    
+    /* get the beaconing name USING SERVICE */
+    EsurlBeaconGetName(&beacon_name, &beacon_name_size);
+
+    if(beacon_name_size > 0)
+    {
+        adv_parameter_len = beacon_name[0];
+        len_i = adv_parameter_len - 1;
+        
+        /* and store in the packet */
+        for(i = 1; (i < beacon_name_size) && (offset < ADVERT_SIZE); i++,offset++, len_i--)
+        {
+            advData[offset] = beacon_name[i];
+            
+            if(len_i == 0)
+            {
+                /* store the advertisement parameter and get length for the next parameter */
+                LsStoreAdvScanData(adv_parameter_len, &advData[offset - adv_parameter_len + 1], ad_src_advertise);
+
+                adv_parameter_len = beacon_name[i+1];
+                len_i = adv_parameter_len;
+                i++;
+            }
+        }
+    }
+    else
+    {
+        /* store the advertisement data */
+        LsStoreAdvScanData(offset, advData, ad_src_advertise);
+    }
+    
+    /* update the beaconing data */
+    EsurlBeaconUpdateData();
+    
+    /* get the beaconing data USING SERVICE */
+    EsurlBeaconGetData(&beacon_data, &beacon_data_size);
+    
+    if(beacon_data_size > 0)
+    {
+        adv_parameter_len = beacon_data[0];
+        len_i = adv_parameter_len - 1;
+        
+        /* and store in the packet */
+        for(i = 1; (i < beacon_data_size) && (offset < ADVERT_SIZE); i++,offset++, len_i--)
+        {
+            advData[offset] = beacon_data[i];
+            
+            if(len_i == 0)
+            {
+                /* store the advertisement parameter and get length for the next parameter */
+                if(LsStoreAdvScanData(adv_parameter_len, &advData[offset - adv_parameter_len + 1], ad_src_advertise) != ls_err_none)
+                {
+                    ReportPanic(app_panic_set_advert_data);
+                }    
+                adv_parameter_len = beacon_data[i+1];
+                len_i = adv_parameter_len;
+                i++;
+            }
+        }
+    }
+    else
+    {
+        /* store the advertisement data */
+        LsStoreAdvScanData(offset, advData, ad_src_advertise);
+    }
+    
+    return beacon_interval;
+}
+
+/*============================================================================*
  *  Public Function Implementations
  *===========================================================================*/
+
+/*----------------------------------------------------------------------------*
+ *  NAME
+ *      BeaconInitData
+ *
+ *  DESCRIPTION
+ *      This function initialises the beacon data to a known state.
+ *
+ *  PARAMETERS
+ *      None
+ *
+ *  RETURNS
+ *      Nothing
+ *----------------------------------------------------------------------------*/
+extern void BeaconDataInit(void)
+{
+    /* Initialise beacon timer */
+    beacon_tid = TIMER_INVALID;
+}
 
 /*----------------------------------------------------------------------------*
  *  NAME
@@ -83,23 +251,19 @@
  *      Nothing
  *----------------------------------------------------------------------------*/
 extern void BeaconStart(bool start)
-{
-    uint8 advData[ADVERT_SIZE];
-    uint16 offset = 0;
-    uint8* beacon_name;
-    uint8 beacon_name_size;
-    uint8* beacon_data;
-    uint8 beacon_data_size;
-    uint8 i;
-    uint8 len_i = 0;
-    uint8 adv_parameter_len = 0;
-    uint32 beacon_interval = EsurlBeaconGetPeriodMillis();    
-    
+{    
     /* Stop broadcasting */
     LsStartStopAdvertise(FALSE, whitelist_disabled, ls_addr_type_random);
     
+    /* Delete buzzer timer if running */
+    if (beacon_tid != TIMER_INVALID)
+    {
+        TimerDelete(beacon_tid);
+        beacon_tid = TIMER_INVALID;
+    }
+    
     /* beacon_interval of zero overrides and stops beaconning */
-    if (start && (beacon_interval != 0)) 
+    if (start) 
     {
         /* prepare the advertisement packet */
    
@@ -110,77 +274,12 @@ extern void BeaconStart(bool start)
                    gap_mode_bond_no,
                    gap_mode_security_none);
         
-        /* clear the existing advertisement and scan response data */
-        LsStoreAdvScanData(0, NULL, ad_src_advertise);
-        LsStoreAdvScanData(0, NULL, ad_src_scan_rsp);
-    
-        /* set the advertisement interval */
-
-        GapSetAdvInterval(beacon_interval, beacon_interval);
-        
-        /* get the beaconing name USING SERVICE */
-        EsurlBeaconGetName(&beacon_name, &beacon_name_size);
-
-        if(beacon_name_size > 0)
-        {
-            adv_parameter_len = beacon_name[0];
-            len_i = adv_parameter_len - 1;
-            
-            /* and store in the packet */
-            for(i = 1; (i < beacon_name_size) && (offset < ADVERT_SIZE); i++,offset++, len_i--)
-            {
-                advData[offset] = beacon_name[i];
-                
-                if(len_i == 0)
-                {
-                    /* store the advertisement parameter and get length for the next parameter */
-                    LsStoreAdvScanData(adv_parameter_len, &advData[offset - adv_parameter_len + 1], ad_src_advertise);
-    
-                    adv_parameter_len = beacon_name[i+1];
-                    len_i = adv_parameter_len;
-                    i++;
-                }
-            }
-        }
-        else
-        {
-            /* store the advertisement data */
-            LsStoreAdvScanData(offset, advData, ad_src_advertise);
-        }
-
-        /* update the beaconing data */
-        EsurlBeaconUpdateData();
-        /* get the beaconing data USING SERVICE */
-        EsurlBeaconGetData(&beacon_data, &beacon_data_size);
-        
-        if(beacon_data_size > 0)
-        {
-            adv_parameter_len = beacon_data[0];
-            len_i = adv_parameter_len - 1;
-            
-            /* and store in the packet */
-            for(i = 1; (i < beacon_data_size) && (offset < ADVERT_SIZE); i++,offset++, len_i--)
-            {
-                advData[offset] = beacon_data[i];
-                
-                if(len_i == 0)
-                {
-                    /* store the advertisement parameter and get length for the next parameter */
-                    LsStoreAdvScanData(adv_parameter_len, &advData[offset - adv_parameter_len + 1], ad_src_advertise);
-    
-                    adv_parameter_len = beacon_data[i+1];
-                    len_i = adv_parameter_len;
-                    i++;
-                }
-            }
-        }
-        else
-        {
-            /* store the advertisement data */
-            LsStoreAdvScanData(offset, advData, ad_src_advertise);
-        }
+        uint32 beacon_interval = BeaconUpdateData();
         
         /* Start broadcasting */
         LsStartStopAdvertise(TRUE, whitelist_disabled, ls_addr_type_random);
+        
+         /* Start the beacon timer */
+        beacon_tid = TimerCreate(beacon_interval/2, TRUE, appBeaconTimerHandler);
     }
 }

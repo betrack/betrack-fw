@@ -383,6 +383,9 @@ static void appDataInit(void)
     /* Battery Service data initialisation */
     BatteryDataInit();
 
+    /* Beacon data initialisation */
+    BeaconDataInit();
+    
     /* Beacon Service data initialisation */
     EsurlBeaconDataInit();
     

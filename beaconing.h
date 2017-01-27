@@ -59,7 +59,7 @@
 /*============================================================================*
  *  Public Function Prototypes
  *============================================================================*/
-
+extern void BeaconDataInit(void);
 /* Start or stop beaconing */
 extern void BeaconStart(bool start);
 
